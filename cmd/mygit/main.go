@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/codecrafters-io/git-starter-go/internal/commands"
+	"github.com/supersection/mygit/internal/commands"
 )
 
 // Usage: your_program.sh <command> <arg1> <arg2> ...
