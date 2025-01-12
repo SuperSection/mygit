@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/codecrafters-io/git-starter-go/internal/commands"
 )
 
 // Usage: your_program.sh <command> <arg1> <arg2> ...
 func main() {
-	// You can use print statements as follows for debugging, they'll be visible when running tests.
-	fmt.Fprintf(os.Stderr, "Logs from your program will appear here!\n")
 
 	if len(os.Args) < 2 {
 		fmt.Fprintf(os.Stderr, "usage: mygit <command> [<args>...]\n")
@@ -17,18 +17,21 @@ func main() {
 
 	switch command := os.Args[1]; command {
 	case "init":
-		for _, dir := range []string{".git", ".git/objects", ".git/refs"} {
-			if err := os.MkdirAll(dir, 0755); err != nil {
-				fmt.Fprintf(os.Stderr, "Error creating directory: %s\n", err)
-			}
+		if err := commands.Init(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
 		}
 
-		headFileContents := []byte("ref: refs/heads/main\n")
-		if err := os.WriteFile(".git/HEAD", headFileContents, 0644); err != nil {
-			fmt.Fprintf(os.Stderr, "Error writing file: %s\n", err)
+	case "cat-file":
+		if len(os.Args) != 4 {
+			fmt.Println("Usage: mygit cat-file < -p|-t|-s > <object-hash>")
+			os.Exit(1)
 		}
-
-		fmt.Println("Initialized git directory")
+		flag, hash := os.Args[2], os.Args[3]
+		if err := commands.CatFile(flag, hash); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
 
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
