@@ -11,15 +11,13 @@ import (
 func main() {
 
 	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "usage: mygit <command> [<args>...]\n")
-		os.Exit(1)
+		showUsageAndExit()
 	}
 
 	switch command := os.Args[1]; command {
 	case "init":
 		if err := commands.Init(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
+			exitWithError(err)
 		}
 
 	case "cat-file":
@@ -29,12 +27,34 @@ func main() {
 		}
 		flag, hash := os.Args[2], os.Args[3]
 		if err := commands.CatFile(flag, hash); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			exitWithError(err)
+		}
+
+	case "hash-object":
+		if len(os.Args) < 3 {
+			fmt.Fprintln(os.Stderr, "Usage: mygit hash-object [-w] <file>")
 			os.Exit(1)
 		}
+		commands.HandleHashObject(os.Args[2:])
 
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
-		os.Exit(1)
+		showUsageAndExit()
 	}
+}
+
+
+
+func showUsageAndExit() {
+	fmt.Fprintln(os.Stderr, "Usage: mygit <command> [<args>...]")
+	fmt.Fprintln(os.Stderr, "Commands:")
+	fmt.Fprintln(os.Stderr, "  init         Initialize a new Git repository")
+	fmt.Fprintln(os.Stderr, "  hash-object  Compute SHA hash of a file or write it to .git/objects")
+	fmt.Fprintln(os.Stderr, "  cat-file     Display information about a Git object")
+	os.Exit(1)
+}
+
+func exitWithError(err error) {
+	fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+	os.Exit(1)
 }
